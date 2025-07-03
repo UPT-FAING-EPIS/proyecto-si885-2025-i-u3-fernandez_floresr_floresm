@@ -1,0 +1,53 @@
+WSTemplateFormatVersion: '2010-09-09'
+Description: 'Stack para procesamiento de ofertas de trabajo'
+
+Resources:
+  # Tabla DynamoDB para ofertas de trabajo
+  OfertasTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ofertas_trabajo
+      AttributeDefinitions:
+        - AttributeName: ID_Oferta
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ID_Oferta
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  # Kinesis Data Stream para ofertas
+  StreamOfertas:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: streamOfertas
+      ShardCount: 1
+      RetentionPeriodHours: 24
+
+  # Tabla para métricas de análisis
+  MetricasTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: metricas_ofertas
+      AttributeDefinitions:
+        - AttributeName: metrica_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: metrica_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  TableName:
+    Description: 'Nombre de la tabla DynamoDB'
+    Value: ofertas_trabajo
+  StreamName:
+    Description: 'Nombre del Kinesis Stream'
+    Value: streamOfertas
+  StreamArn:
+    Description: 'ARN del Kinesis Stream'
+    Value: 
+      Fn::GetAtt: 
+        - StreamOfertas
+        - Arn
